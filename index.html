@@ -65,6 +65,7 @@
           position: {lat: data[code]['airport_position'][0],
              lng: data[code]['airport_position'][1]},
           map: window.googleMap,
+          icon: 'airport.png',
         })
         marker.addListener('click', function() {
           window.infowindow.setContent(`<h4>Aeropuerto</h4>${code}<br>${data[code]['city']}<br>${data[code]['country']}`);
