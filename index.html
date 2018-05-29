@@ -14,7 +14,7 @@
       function initMap() {
         var scl = {lat: -33.382761, lng: -70.803203};
         window.googleMap = new google.maps.Map(document.getElementById('map'), {
-          zoom: 5,
+          zoom: 6,
           center: scl
         });
       }
@@ -29,6 +29,7 @@
     const positions = {};
     const airports = {};
     const flightsMarkers = {};
+    const flightLines = {};
 
     socket.emit('AIRPORTS',{});
     socket.emit('FLIGHTS',{});
@@ -49,21 +50,7 @@
         positions[data.code].push({lat: data.position[0], lng: data.position[1]});
       }
 
-      //Editar para actualizar solo el vuelo que recibe info
-      console.log(positions);
-      const i = Object.keys(positions);
-      console.log(i);
-      i.forEach((flight) => {
-        var flightPath = new google.maps.Polyline({
-         path: Object.values(positions[flight]),
-         geodesic: true,
-         strokeColor: '#3DD508',
-         strokeOpacity: 1.0,
-         strokeWeight: 2
-       });
-       flightPath.setMap(window.googleMap);
-      })
-
+      flightLines[data.code].setPath(positions[data.code]);
       // Update marker
       flightsMarkers[data.code].setPosition({lat: data.position[0], lng: data.position[1]});
 
@@ -80,7 +67,7 @@
           map: window.googleMap,
         })
         marker.addListener('click', function() {
-          window.infowindow.setContent(`Aeropuerto, ${data[code]['city']}, ${code}`);
+          window.infowindow.setContent(`<h4>Aeropuerto</h4>${code}<br>${data[code]['city']}<br>${data[code]['country']}`);
           window.infowindow.open(window.googleMap, marker);
         });
       });
@@ -96,8 +83,8 @@
               {lat: f['destination']['airport_position'][0], lng: f['destination']['airport_position'][1]}],
          geodesic: true,
          strokeColor: '#CB0C0C',
-         strokeOpacity: 1.0,
-         strokeWeight: 2
+         strokeOpacity: 0.3,
+         strokeWeight: 4
        });
        flightPath.setMap(window.googleMap);
 
@@ -110,11 +97,28 @@
         flightsMarkers[f.code] = plane
         console.log(flightsMarkers);
         plane.addListener('click', function() {
-          window.infowindow.setContent(`Avion,
-             ${f['origin']['airport_code']}-${f['destination']['airport_code']},
-             ${f['code']}`);
+          window.infowindow.setContent(`<h4>Avion</h4>
+             ${f['origin']['airport_code']}-${f['destination']['airport_code']}<br>
+             ${f['code']}<br>${f['plane']}`);
           window.infowindow.open(window.googleMap, plane);
         });
+
+        console.log(positions);
+        const i = Object.keys(positions);
+        console.log(i);
+        i.forEach((flight) => {
+          var flightPath = new google.maps.Polyline({
+           path: [],
+           geodesic: true,
+           strokeColor: '#3DD508',
+           strokeOpacity: 0.5,
+           strokeWeight: 4,
+         });
+         flightPath.setMap(window.googleMap);
+         flightLines[flight] = flightPath;
+        })
+
+
       });
 
     });
